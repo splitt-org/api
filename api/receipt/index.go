@@ -13,9 +13,16 @@ type ErrorDetails struct {
 	Message string `json:"message"`
 }
 
+type ReceiptData struct {
+	Items []Item `json:"items"`
+	Tax   string `json:"tax"`
+	Tip   string `json:"tip"`
+	Total string `json:"total"`
+}
+
 type Response struct {
 	Success bool          `json:"success"`
-	Data    []Item        `json:"data,omitempty"`
+	Data    ReceiptData   `json:"data,omitempty"`
 	Error   *ErrorDetails `json:"error,omitempty"`
 }
 
@@ -148,16 +155,42 @@ func Handler(w http.ResponseWriter, r *http.Request) {
 	linesByTop := mergeOCRlines(lines)
 
 	var items []Item
+	tax := "0.00"
+	tip := "0.00"
+	total := "0.00"
 
 	for _, line := range linesByTop {
 		name, price := findItem(line.LineText)
-		if name != "" && price != "" {
-			items = append(items, Item{Name: name, Price: price})
+
+		if name == "" || price == "" {
+			continue
 		}
+
+		if strings.EqualFold(name, "tax") {
+			tax = price
+			continue
+		}
+
+		if strings.EqualFold(name, "tip") {
+			tip = price
+			continue
+		}
+
+		if strings.EqualFold(name, "total") {
+			total = price
+			continue
+		}
+
+		items = append(items, Item{Name: name, Price: price})
 	}
 
 	crw.SendJSONResponse(http.StatusOK, Response{
 		Success: true,
-		Data:    items,
+		Data: ReceiptData{
+			Items: items,
+			Tax:   tax,
+			Tip:   tip,
+			Total: total,
+		},
 	})
 }
