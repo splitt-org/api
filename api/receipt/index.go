@@ -4,6 +4,7 @@ import (
 	"github.com/splitt-org/api/wrappers/http"
 	"github.com/splitt-org/api/wrappers/ocr"
 	"net/http"
+  "json"
 )
 
 type ErrorDetails struct {
@@ -26,7 +27,12 @@ func Handler(w http.ResponseWriter, r *http.Request) {
 
   var reqBody RequestBody
   if err := json.NewDecoder(r.Body).Decode(&reqBody); err != nil {
-      sendErrorResponse(crw, "Invalid request body.")
+      crw.SendJSONResponse(http.StatusBadRequest, Response{
+        Success: false,
+        Error: &ErrorDetails{
+          Message: "Invalid request body.",
+        },
+      })
       return
   }
 
