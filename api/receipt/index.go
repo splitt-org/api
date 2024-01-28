@@ -12,9 +12,9 @@ type ErrorDetails struct {
 }
 
 type Response struct {
-	Success bool                   `json:"success"`
-	Data    *splittocr.OCRResponse `json:"data,omitempty"`
-	Error   *ErrorDetails          `json:"error,omitempty"`
+	Success bool                `json:"success"`
+	Data    []splittocr.OCRLine `json:"data,omitempty"`
+	Error   *ErrorDetails       `json:"error,omitempty"`
 }
 
 type RequestBody struct {
@@ -83,6 +83,6 @@ func Handler(w http.ResponseWriter, r *http.Request) {
 
 	crw.SendJSONResponse(http.StatusOK, Response{
 		Success: true,
-		Data:    &ocrRes,
+		Data:    ocrRes.TextOverlay.Lines,
 	})
 }
