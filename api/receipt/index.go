@@ -12,9 +12,9 @@ type ErrorDetails struct {
 }
 
 type Response struct {
-	Success bool          `json:"success"`
-	Data    []byte        `json:"data,omitempty"`
-	Error   *ErrorDetails `json:"error,omitempty"`
+	Success bool                   `json:"success"`
+	Data    *splittocr.OCRResponse `json:"data,omitempty"`
+	Error   *ErrorDetails          `json:"error,omitempty"`
 }
 
 type RequestBody struct {
@@ -53,7 +53,7 @@ func Handler(w http.ResponseWriter, r *http.Request) {
 	}
 
 	formValues := map[string]string{
-    "base64Image": "data:image/png;base64," + image,
+		"base64Image": "data:image/png;base64," + image,
 		"isTable":     "true",
 	}
 
@@ -70,8 +70,19 @@ func Handler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	var ocrRes splittocr.OCRResponse
+	if err := json.Unmarshal(responseData, &ocrRes); err != nil {
+		crw.SendJSONResponse(http.StatusInternalServerError, Response{
+			Success: false,
+			Error: &ErrorDetails{
+				Message: "Failed to parse OCR response.",
+			},
+		})
+		return
+	}
+
 	crw.SendJSONResponse(http.StatusOK, Response{
 		Success: true,
-		Data:    responseData,
+		Data:    ocrRes,
 	})
 }
