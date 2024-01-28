@@ -16,14 +16,24 @@ type Response struct {
 	Error   *ErrorDetails `json:"error,omitempty"`
 }
 
+type RequestBody struct {
+    Image string `json:"image"`
+}
+
 func Handler(w http.ResponseWriter, r *http.Request) {
 	crw := &splitthttp.ResponseWriter{W: w}
 	crw.SetCors(r.Host)
 
-  image := r.URL.Query().Get("image")
+  var reqBody RequestBody
+  if err := json.NewDecoder(r.Body).Decode(&reqBody); err != nil {
+      sendErrorResponse(crw, "Invalid request body.")
+      return
+  }
+
+  image := reqBody.Image
 
   if image == "" {
-    crw.SendJSONResponse(http.StatusOK, Response{
+    crw.SendJSONResponse(http.StatusBadRequest, Response{
 			Success: false,
 			Error: &ErrorDetails{
 				Message: "No image query is populated.",
@@ -45,7 +55,7 @@ func Handler(w http.ResponseWriter, r *http.Request) {
 
 	responseData, err := splittocr.PostOCRRequest(ocrReq)
 	if err != nil {
-		crw.SendJSONResponse(http.StatusOK, Response{
+		crw.SendJSONResponse(http.StatusInternalServerError, Response{
 			Success: false,
 			Error: &ErrorDetails{
 				Message: "Failed to OCR.",
