@@ -6,6 +6,7 @@ import (
 	"github.com/splitt-org/api/wrappers/ocr"
 	"net/http"
 	"regexp"
+	"strings"
 )
 
 type ErrorDetails struct {
