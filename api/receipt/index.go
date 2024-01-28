@@ -12,7 +12,7 @@ type ErrorDetails struct {
 
 type Response struct {
 	Success bool          `json:"success"`
-	Data    string        `json:"data,omitempty"`
+	Data    []byte        `json:"data,omitempty"`
 	Error   *ErrorDetails `json:"error,omitempty"`
 }
 
