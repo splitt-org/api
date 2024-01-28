@@ -18,17 +18,17 @@ type OCRRequest struct {
 
 type OCRWord struct {
 	WordText string `json:"WordText"`
-	Left     int    `json:"Left"`
-	Top      int    `json:"Top"`
-	Height   int    `json:"Height"`
-	Width    int    `json:"Width"`
+	Left     float64    `json:"Left"`
+	Top      float64    `json:"Top"`
+	Height   float64    `json:"Height"`
+	Width    float64    `json:"Width"`
 }
 
 type OCRLine struct {
 	LineText  string    `json:"LineText"`
 	Words     []OCRWord `json:"Words"`
-	MaxHeight int       `json:"MaxHeight"`
-	MinTop    int       `json:"MinTop"`
+	MaxHeight float64       `json:"MaxHeight"`
+	MinTop    float64       `json:"MinTop"`
 }
 
 type TextOverlay struct {

@@ -29,7 +29,7 @@ func mergeOCRlines(ocrLines []splittocr.OCRLine) map[int]string {
 			continue
 		}
 
-		topValue := line.Words[0].Top
+		topValue := int(line.Words[0].Top)
 		if existingLine, exists := mergedLines[topValue]; exists {
 			mergedLines[topValue] = existingLine + " " + line.LineText
 		} else {
