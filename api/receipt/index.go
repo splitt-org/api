@@ -5,6 +5,7 @@ import (
 	"github.com/splitt-org/api/wrappers/http"
 	"github.com/splitt-org/api/wrappers/ocr"
 	"net/http"
+  "log"
 )
 
 type ErrorDetails struct {
@@ -81,10 +82,11 @@ func Handler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	ocrLines := ocrRes.ParsedResults[0].TextOverlay.Lines
+	lines := ocrRes.ParsedResults[0].TextOverlay.Lines
+  log.Println(lines)
 
 	crw.SendJSONResponse(http.StatusOK, Response{
 		Success: true,
-		Data:    ocrLines,
+		Data:    lines,
 	})
 }
