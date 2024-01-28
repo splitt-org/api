@@ -4,8 +4,8 @@ import (
 	"encoding/json"
 	"github.com/splitt-org/api/wrappers/http"
 	"github.com/splitt-org/api/wrappers/ocr"
+	"log"
 	"net/http"
-  "log"
 )
 
 type ErrorDetails struct {
@@ -13,13 +13,32 @@ type ErrorDetails struct {
 }
 
 type Response struct {
-	Success bool                `json:"success"`
-	Data    []splittocr.OCRLine `json:"data,omitempty"`
-	Error   *ErrorDetails       `json:"error,omitempty"`
+	Success bool           `json:"success"`
+	Data    map[int]string `json:"data,omitempty"`
+	Error   *ErrorDetails  `json:"error,omitempty"`
 }
 
 type RequestBody struct {
 	Image string `json:"image"`
+}
+
+func mergeOCRlines(ocrLines []splittocr.OCRLine) map[int]string {
+	mergedLines := make(map[int]string)
+
+	for _, line := range ocrLines {
+		if len(line.Words) == 0 {
+			continue
+		}
+
+		topValue := line.Words[0].Top
+		if existingLine, exists := mergedLines[topValue]; exists {
+			mergedLines[topValue] = existingLine + " " + line.LineText
+		} else {
+			mergedLines[topValue] = line.LineText
+		}
+	}
+
+	return mergedLines
 }
 
 func Handler(w http.ResponseWriter, r *http.Request) {
@@ -83,10 +102,9 @@ func Handler(w http.ResponseWriter, r *http.Request) {
 	}
 
 	lines := ocrRes.ParsedResults[0].TextOverlay.Lines
-  log.Println(lines)
 
 	crw.SendJSONResponse(http.StatusOK, Response{
 		Success: true,
-		Data:    lines,
+		Data:    mergeOCRlines(lines),
 	})
 }
