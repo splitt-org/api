@@ -40,6 +40,14 @@ func isPrice(s string) bool {
 	return regex.MatchString(s)
 }
 
+func containsAsWord(s string, target string) bool {
+	escapedTarget := regexp.QuoteMeta(target)
+	regexPattern := fmt.Sprintf(`(?i)\b%s\b`, escapedTarget)
+	regex := regexp.MustCompile(regexPattern)
+
+	return regex.MatchString(s)
+}
+
 func findItem(input string) (string, string) {
 	parts := strings.Fields(input)
 	var name string
@@ -162,21 +170,21 @@ func Handler(w http.ResponseWriter, r *http.Request) {
 	for _, line := range linesByTop {
 		name, price := findItem(line.LineText)
 
-		if name == "" || price == "" {
+		if name == "" || price == "" || containsAsWord(name, "subtotal") {
 			continue
 		}
 
-		if strings.EqualFold(name, "tax") {
+		if containsAsWord(name, "tax") {
 			tax = price
 			continue
 		}
 
-		if strings.EqualFold(name, "tip") {
+		if containsAsWord(name, "tip") {
 			tip = price
 			continue
 		}
 
-		if strings.EqualFold(name, "total") {
+		if containsAsWord(name, "total") {
 			total = price
 			continue
 		}
