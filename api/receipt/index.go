@@ -5,6 +5,7 @@ import (
 	"github.com/splitt-org/api/wrappers/http"
 	"github.com/splitt-org/api/wrappers/ocr"
 	"net/http"
+	"regexp"
 )
 
 type ErrorDetails struct {
@@ -12,13 +13,39 @@ type ErrorDetails struct {
 }
 
 type Response struct {
-	Success bool           `json:"success"`
-	Data    map[int]string `json:"data,omitempty"`
-	Error   *ErrorDetails  `json:"error,omitempty"`
+	Success bool          `json:"success"`
+	Data    []Item        `json:"data,omitempty"`
+	Error   *ErrorDetails `json:"error,omitempty"`
 }
 
 type RequestBody struct {
 	Image string `json:"image"`
+}
+
+type Item struct {
+	Name  string `json:"name"`
+	Price string `json:"price"`
+}
+
+func isPrice(s string) bool {
+	regex := regexp.MustCompile(`^\d*\.\d{2}$`)
+	return regex.MatchString(s)
+}
+
+func findItem(input string) (string, string) {
+	parts := strings.Fields(input)
+	var name string
+	var price string
+
+	for i := len(parts) - 1; i >= 0; i-- {
+		if isPrice(parts[i]) {
+			price = parts[i]
+			name = strings.Join(parts[:i], " ")
+			break
+		}
+	}
+
+	return name, price
 }
 
 func mergeOCRlines(ocrLines []splittocr.OCRLine) map[int]string {
@@ -33,7 +60,7 @@ func mergeOCRlines(ocrLines []splittocr.OCRLine) map[int]string {
 		found := false
 
 		for mergedTop := range mergedLines {
-			if topValue >= mergedTop - 1 && topValue <= mergedTop + 1 {
+			if topValue >= mergedTop-1 && topValue <= mergedTop+1 {
 				mergedLines[mergedTop] += " " + line.LineText
 				found = true
 				break
@@ -109,9 +136,19 @@ func Handler(w http.ResponseWriter, r *http.Request) {
 	}
 
 	lines := ocrRes.ParsedResults[0].TextOverlay.Lines
+	linesByTop := mergeOCRlines(lines)
+
+	var items []Item
+
+	for _, line := range linesByTop {
+		name, price := findItem(line)
+		if name != "" && price != "" {
+			items = append(items, Item{Name: name, Price: price})
+		}
+	}
 
 	crw.SendJSONResponse(http.StatusOK, Response{
 		Success: true,
-		Data:    mergeOCRlines(lines),
+		Data:    items,
 	})
 }
