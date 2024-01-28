@@ -21,7 +21,7 @@ type RequestBody struct {
 	Image string `json:"image"`
 }
 
-func mergeOCRlines(ocrLines []splittocr.OCRLine) map[int]string {
+func mergeOCRlines(ocrLines []OCRLine) map[int]string {
 	mergedLines := make(map[int]string)
 
 	for _, line := range ocrLines {
@@ -30,9 +30,17 @@ func mergeOCRlines(ocrLines []splittocr.OCRLine) map[int]string {
 		}
 
 		topValue := int(line.Words[0].Top)
-		if existingLine, exists := mergedLines[topValue]; exists {
-			mergedLines[topValue] = existingLine + " " + line.LineText
-		} else {
+		found := false
+
+		for mergedTop := range mergedLines {
+			if topValue >= mergedTop - 1 && topValue <= mergedTop + 1 {
+				mergedLines[mergedTop] += " " + line.LineText
+				found = true
+				break
+			}
+		}
+
+		if !found {
 			mergedLines[topValue] = line.LineText
 		}
 	}
