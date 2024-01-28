@@ -3,7 +3,6 @@ package receipt
 import (
 	"github.com/splitt-org/api/wrappers/http"
 	"github.com/splitt-org/api/wrappers/ocr"
-	"log"
 	"net/http"
 )
 
@@ -21,12 +20,24 @@ func Handler(w http.ResponseWriter, r *http.Request) {
 	crw := &splitthttp.ResponseWriter{W: w}
 	crw.SetCors(r.Host)
 
+  image := r.URL.Query().Get("image")
+
+  if image != "" {
+    crw.SendJSONResponse(http.StatusOK, Response{
+			Success: false,
+			Error: &ErrorDetails{
+				Message: "No image query is populated.",
+			},
+		})
+		return
+  }
+
 	headers := map[string]string{
 		"apikey": "helloworld",
 	}
 
 	formValues := map[string]string{
-		"url":     "https://ocr.space/Content/Images/receipt-ocr-original.jpg",
+		"base64Image": image,
 		"isTable": "true",
 	}
 
@@ -43,9 +54,8 @@ func Handler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	log.Println(string(responseData))
 	crw.SendJSONResponse(http.StatusOK, Response{
 		Success: true,
-		Data:    string(responseData),
+		Data:    responseData,
 	})
 }
