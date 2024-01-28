@@ -2,6 +2,7 @@ package receipt
 
 import (
 	"github.com/splitt-org/api/wrappers/http"
+	"github.com/splitt-org/api/wrappers/ocr"
 	"log"
 	"net/http"
 )
