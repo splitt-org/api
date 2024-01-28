@@ -83,6 +83,6 @@ func Handler(w http.ResponseWriter, r *http.Request) {
 
 	crw.SendJSONResponse(http.StatusOK, Response{
 		Success: true,
-		Data:    ocrRes,
+		Data:    &ocrRes,
 	})
 }
