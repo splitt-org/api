@@ -53,7 +53,7 @@ func Handler(w http.ResponseWriter, r *http.Request) {
 	}
 
 	formValues := map[string]string{
-		"base64Image": image,
+    "base64Image": "data:image/png;base64," + image,
 		"isTable":     "true",
 	}
 
