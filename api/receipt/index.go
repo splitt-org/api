@@ -150,6 +150,8 @@ func Handler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+  log.Println(responseData)
+
 	var ocrRes splittocr.OCRResponse
 	if err := json.Unmarshal(responseData, &ocrRes); err != nil {
 		crw.SendJSONResponse(http.StatusInternalServerError, Response{
@@ -160,8 +162,6 @@ func Handler(w http.ResponseWriter, r *http.Request) {
 		})
 		return
 	}
-
-	log.Println(ocrRes)
 
 	if len(ocrRes.ParsedResults) == 0 {
 		crw.SendJSONResponse(http.StatusInternalServerError, Response{
