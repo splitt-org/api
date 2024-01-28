@@ -22,7 +22,7 @@ func Handler(w http.ResponseWriter, r *http.Request) {
 
   image := r.URL.Query().Get("image")
 
-  if image != "" {
+  if image == "" {
     crw.SendJSONResponse(http.StatusOK, Response{
 			Success: false,
 			Error: &ErrorDetails{
