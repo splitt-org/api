@@ -21,7 +21,7 @@ type RequestBody struct {
 	Image string `json:"image"`
 }
 
-func mergeOCRlines(ocrLines []OCRLine) map[int]string {
+func mergeOCRlines(ocrLines []splittocr.OCRLine) map[int]string {
 	mergedLines := make(map[int]string)
 
 	for _, line := range ocrLines {
