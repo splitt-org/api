@@ -2,6 +2,7 @@ package receipt
 
 import (
 	"encoding/json"
+	"fmt"
 	"github.com/splitt-org/api/wrappers/http"
 	"github.com/splitt-org/api/wrappers/ocr"
 	"net/http"
