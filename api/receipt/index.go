@@ -29,7 +29,7 @@ type Item struct {
 }
 
 func isPrice(s string) bool {
-	regex := regexp.MustCompile(`^\d*\.\d{2}$`)
+	regex := regexp.MustCompile(`^\$?\d*\.\d{2}$`)
 	return regex.MatchString(s)
 }
 
@@ -49,8 +49,13 @@ func findItem(input string) (string, string) {
 	return name, price
 }
 
-func mergeOCRlines(ocrLines []splittocr.OCRLine) map[int]string {
-	mergedLines := make(map[int]string)
+type MergedLine struct {
+	Top      int
+	LineText string
+}
+
+func mergeOCRlines(ocrLines []splittocr.OCRLine) []MergedLine {
+	var mergedLines []MergedLine
 
 	for _, line := range ocrLines {
 		if len(line.Words) == 0 {
@@ -60,16 +65,19 @@ func mergeOCRlines(ocrLines []splittocr.OCRLine) map[int]string {
 		topValue := int(line.Words[0].Top)
 		found := false
 
-		for mergedTop := range mergedLines {
-			if topValue >= mergedTop-1 && topValue <= mergedTop+1 {
-				mergedLines[mergedTop] += " " + line.LineText
+		for i := range mergedLines {
+			if topValue >= mergedLines[i].Top-1 && topValue <= mergedLines[i].Top+1 {
+				mergedLines[i].LineText += " " + line.LineText
 				found = true
 				break
 			}
 		}
 
 		if !found {
-			mergedLines[topValue] = line.LineText
+			mergedLines = append(mergedLines, MergedLine{
+				Top:      topValue,
+				LineText: line.LineText,
+			})
 		}
 	}
 
@@ -142,7 +150,7 @@ func Handler(w http.ResponseWriter, r *http.Request) {
 	var items []Item
 
 	for _, line := range linesByTop {
-		name, price := findItem(line)
+		name, price := findItem(line.LineText)
 		if name != "" && price != "" {
 			items = append(items, Item{Name: name, Price: price})
 		}
