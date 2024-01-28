@@ -81,8 +81,10 @@ func Handler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	ocrLines := ocrRes.ParsedResults[0].TextOverlay.Lines
+
 	crw.SendJSONResponse(http.StatusOK, Response{
 		Success: true,
-		Data:    ocrRes.TextOverlay.Lines,
+		Data:    ocrLines,
 	})
 }
