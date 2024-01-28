@@ -1,10 +1,10 @@
 package receipt
 
 import (
+	"encoding/json"
 	"github.com/splitt-org/api/wrappers/http"
 	"github.com/splitt-org/api/wrappers/ocr"
 	"net/http"
-  "json"
 )
 
 type ErrorDetails struct {
@@ -18,35 +18,35 @@ type Response struct {
 }
 
 type RequestBody struct {
-    Image string `json:"image"`
+	Image string `json:"image"`
 }
 
 func Handler(w http.ResponseWriter, r *http.Request) {
 	crw := &splitthttp.ResponseWriter{W: w}
 	crw.SetCors(r.Host)
 
-  var reqBody RequestBody
-  if err := json.NewDecoder(r.Body).Decode(&reqBody); err != nil {
-      crw.SendJSONResponse(http.StatusBadRequest, Response{
-        Success: false,
-        Error: &ErrorDetails{
-          Message: "Invalid request body.",
-        },
-      })
-      return
-  }
+	var reqBody RequestBody
+	if err := json.NewDecoder(r.Body).Decode(&reqBody); err != nil {
+		crw.SendJSONResponse(http.StatusBadRequest, Response{
+			Success: false,
+			Error: &ErrorDetails{
+				Message: "Invalid request body.",
+			},
+		})
+		return
+	}
 
-  image := reqBody.Image
+	image := reqBody.Image
 
-  if image == "" {
-    crw.SendJSONResponse(http.StatusBadRequest, Response{
+	if image == "" {
+		crw.SendJSONResponse(http.StatusBadRequest, Response{
 			Success: false,
 			Error: &ErrorDetails{
 				Message: "No image query is populated.",
 			},
 		})
 		return
-  }
+	}
 
 	headers := map[string]string{
 		"apikey": "helloworld",
@@ -54,7 +54,7 @@ func Handler(w http.ResponseWriter, r *http.Request) {
 
 	formValues := map[string]string{
 		"base64Image": image,
-		"isTable": "true",
+		"isTable":     "true",
 	}
 
 	ocrReq := splittocr.NewOCRRequest(headers, formValues)
