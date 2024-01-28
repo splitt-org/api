@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"github.com/splitt-org/api/wrappers/http"
 	"github.com/splitt-org/api/wrappers/ocr"
+	"log"
 	"net/http"
 	"regexp"
 	"strings"
@@ -151,6 +152,18 @@ func Handler(w http.ResponseWriter, r *http.Request) {
 
 	var ocrRes splittocr.OCRResponse
 	if err := json.Unmarshal(responseData, &ocrRes); err != nil {
+		crw.SendJSONResponse(http.StatusInternalServerError, Response{
+			Success: false,
+			Error: &ErrorDetails{
+				Message: "Failed to parse OCR response.",
+			},
+		})
+		return
+	}
+
+	log.Println(ocrRes)
+
+	if len(ocrRes.ParsedResults) == 0 {
 		crw.SendJSONResponse(http.StatusInternalServerError, Response{
 			Success: false,
 			Error: &ErrorDetails{
